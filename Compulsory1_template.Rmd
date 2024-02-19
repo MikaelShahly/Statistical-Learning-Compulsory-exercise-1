@@ -5,7 +5,8 @@ author: "NN1, NN2 and NN3 (full names of all group members)"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: 
   html_document
-  pdf_document
+  pdf_document:
+    extra_dependencies : ["amsmath"]
 ---
 
 ```{r setup, include=FALSE}
@@ -136,25 +137,63 @@ To reduce the the standard error of the slope estimators $\boldsymbol{\hat\beta}
 
 By increasing the amount of data we reduce $\hat{\sigma}$ and therefore $\hat{SE}(\hat{\beta_i})$
 
-## c) 
+## c)
 
 ```{r}
 lm_4 <- lm(medv ~ crim + age + rm, data = Boston)
 summary(lm_4)
 ```
 
-$H_0:  \hat{\beta_\text{rm}}  = 0$  - predictor has no correlation with predicted target value $\hat{y}$
+$H_0: \hat{\beta_\text{rm}} = 0$ - predictor has no correlation with predicted target value $\hat{y}$
 
 #### ii)
 
+\$\$ \begin{align}
+H_{0}&: \beta_{\alpha} = 0 &&\forall \alpha \in \{ \text{crim}, \text{age}, \text{rm} \}  \\
+
+H_{1}&: \beta_{\alpha} \neq 0 && \text{for at least one } \alpha 
+\end{align} \$\$
+
 ```{r}
 #under H0 the F-value is given
-p = length(coef(lm_4)) + 1
-k = length(coef(lm_4))
-n = nobs(lm_4)
+t <- Boston["medv"][1]
+p <- length(coef(lm_4)) + 1
+k <- length(coef(lm_4))
+n <- nobs(lm_4)
+TSS <- sum(Boston["medv"] - mean(Boston$medv)^2)
+RSS <- sum(Boston["medv"] - mean(predict(lm_4))^2)
+SSE <- TSS - RSS
 
-F = ((n - p) / k) * (R / (R - R^2))
+F = ((TSS - RSS) / p) / (RSS / (n - p - 1))
+p_val = qf(F, k, n-p, lower.tail=FALSE) 
+print(p_val)
 ```
+
+#### iii)
+
+```{r}
+#for new linear regression model
+lm_5 = lm(medv ~ crim + age, data = Boston)
+
+
+t <- Boston["medv"][1]
+p <- length(coef(lm_5)) + 1
+k <- length(coef(lm_5))
+n <- nobs(lm_5)
+TSS <- sum(Boston["medv"] - mean(Boston$medv)^2)
+RSS <- sum(Boston["medv"] - mean(predict(lm_5))^2)
+SSE <- TSS - RSS
+
+F = ((TSS - RSS) / p) / (RSS / (n - p - 1))
+p_val = qf(F, k, n-p, lower.tail=FALSE) 
+print(p_val)
+```
+
+## d)
+
+## f) 
+
+i) False
 
 # Problem 3
 
