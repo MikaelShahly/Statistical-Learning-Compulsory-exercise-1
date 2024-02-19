@@ -1,0 +1,130 @@
+---
+subtitle: "TMA4268 Statistical Learning V2024"
+title: "Compulsory exercise 1: Group XYZ (add your group number here)"
+author: "NN1, NN2 and NN3 (full names of all group members)"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  html_document
+  pdf_document
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+knitr::opts_chunk$set(echo = TRUE,tidy=TRUE,message=FALSE,warning=FALSE,strip.white=TRUE,prompt=FALSE,
+                      cache=TRUE, size="scriptsize",fig.width=4, fig.height=3,fig.align = "center")
+```
+
+```{r,eval=TRUE,echo=FALSE}
+# install.packages("knitr") # probably already installed
+# install.packages("rmarkdown") # probably already installed
+# install.packages("ggplot2") # plotting with ggplot2
+# install.packages("dplyr") # for data cleaning and preparation
+# install.packages("ggfortify") # for model checking
+#install.packages("MASS")
+#install.packages("tidyr")
+#install.packages("carData") # dataset
+#install.packages("class")
+#install.packages("pROC")
+#install.packages("plotROC")
+#install.packages("boot")
+#install.packages("ggmosaic")
+library("knitr")
+library("rmarkdown")
+```
+
+<!--  Etc (load all packages needed). -->
+
+# Problem 1
+
+For this problem you will need to include some LaTex code. Please install latex on your computer and then consult Compulsor1.Rmd for hints how to write formulas in LaTex
+
+## a)
+
+Qualitative variable: Is a categorical variable. In a cat / dog classifiers examples of a qualitiave variable is face shape (round / square), ear shape (round / pointed) and country of origin.
+
+Quantitative variable: Is a continous variable. I the dog / cat classifier examples would be weight, tail length, amount of teeth.
+
+## b)
+
+LDA, QDA, KNN
+
+## c)
+
+$var(\epsilon)$ - is irreducible error term, this term will represent the irreducible error in our cost function (MSE). Note $\epsilon$ is the random variable that represents the inherent noise in our data.
+
+$var(\hat{f}(X))$ - represents the variance. So how much the estimator will change when there are changes in the training data (so it represents its ability to generalize to a new unseen dataset, high varience implies that it does not generalize to unseen datasets well)
+
+$E([(f(x) - \hat{f}(x)])^2$ - represents the bias, so the expected error between the dataset and our estimator
+
+The derivation of the formula is:$$
+E[(y - \hat{y} )^2] \\
+= E[f(x) + \epsilon - \hat{f}(x)^2] \\
+= E[f(x)^2] + E[\hat{f}(x)]^2 + E[\epsilon^2] + E[\hat{f}(x)^2] + E[2f(x)\epsilon] + E[-2\epsilon \hat{f}(x)] -2E[f(x)\hat{f}(x)] \\
+= f(x)^2 + \epsilon^2 + E[\hat{f}(x)]^2 + 2f(x)E[\epsilon] - 2E[\epsilon]E[\hat{f}(x)] + -2E[f(x)\hat{f}(x)] \\
+= f(x)^2 + E[\epsilon^2] + -2f(x)E[\hat{f}(x)] + E[\hat{f}(x)]^2 + var[\hat{f}(x)]\\
+= E[(f(x) - \hat{f}(x))^2] + var[\hat{f}(x)]+ var[\epsilon]
+$$
+
+The main calculations are that $var[\epsilon] = E[\epsilon]^2 + E[\epsilon^2]$ where $E[\epsilon] =0$. f(x) is not a random variable and is therefore treated like a constant. $\epsilon$ is considered independent from $\hat{f}(x)$ as $\epsilon$ is uncorrelated noise.
+
+## d)
+
+k = 1 : blue
+
+k = 3 : red
+
+k = 5: red
+
+## e)
+
+```{r}
+#import boston housing dataset
+library(MASS)
+data(Boston)
+
+lm_1 <- lm(medv~rm + age, data=Boston)
+summary(lm_1)
+```
+
+```{r}
+cor_matrix <- cor(Boston[c("rm", "medv", "age")])
+cor_matrix
+```
+
+```{r}
+lm_2 = lm(medv~rm + age + nox, data=Boston)
+summary(lm_2)
+```
+
+The p-value is a hypothesis test with H0 = the features independant from the target values (uncorrelated, so the corresponding slope estimator for the feature is zero $\beta = 0$) . Lets check the correlation of nox and age
+
+```{r}
+cor_nox_age <- cor(Boston[c("nox", "age")])
+print(cor_nox_age)
+```
+
+As we can see nox and age are closely correlated. This means both the feature likely play a large role in creating the model. They then have a similare effect on the regression model and therefore the significance of each predictor is reduced in the model (compared to making a linear regression model with only age or only nox).
+
+# Problem 2
+
+Here is a code chunk:
+
+```{r, eval=FALSE, echo=TRUE}
+# load the boston housing price dataset
+data(Boston)
+
+# fit the linear regression model
+lm_model <- ...
+```
+
+## a)
+
+## b)
+
+## c)
+
+...
+
+# Problem 3
+
+# Problem 4
