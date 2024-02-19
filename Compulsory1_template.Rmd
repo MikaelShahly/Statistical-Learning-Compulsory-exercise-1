@@ -30,6 +30,7 @@ knitr::opts_chunk$set(echo = TRUE,tidy=TRUE,message=FALSE,warning=FALSE,strip.wh
 #install.packages("ggmosaic")
 library("knitr")
 library("rmarkdown")
+library("ggfortify")
 ```
 
 <!--  Etc (load all packages needed). -->
@@ -107,23 +108,53 @@ As we can see nox and age are closely correlated. This means both the feature li
 
 # Problem 2
 
-Here is a code chunk:
+## a)
 
-```{r, eval=FALSE, echo=TRUE}
-# load the boston housing price dataset
-data(Boston)
-
-# fit the linear regression model
-lm_model <- ...
+```{r, eval=TRUE, echo=TRUE}
+lm_3 <- lm(medv ~ crim + age + crim*age + rm + rm^2, data=Boston)
+summary(lm_3)
 ```
 
-## a)
+When $x_{\text{crim}}$ is increased by 10 while $x_{\text{age}}$ is held constant at 60, the resulting change to medv will be given by the slope coefficients related to the predictors given by crim ( $x_{\text{crim}}$ and $x_{\text{crim} * \text{age}}$).
+
+This implies that $\delta\hat{\text{medv}} = \delta{x_\text{crim}} * \beta_\text{crim} + \delta x_\text{crim*age} \beta_\text{crim * age}$
+
+which gives a change of $\delta\hat{\text{medv}} = -5.29827 * 10^3$
+
+```{r}
+#some independent analysis of the dataset
+cor_matrix <- cor(Boston[c("medv", "dis")])
+lm_dis <- lm(medv ~ dis, data=Boston)
+residuals_lm_dis <- residuals(lm_dis)
+autoplot(lm_dis)
+summary(lm_dis)
+```
 
 ## b)
 
-## c)
+To reduce the the standard error of the slope estimators $\boldsymbol{\hat\beta}$ we can increase the amount of data collected. This is because the $\hat{SE}(\hat{\beta_i})$) is given by dividing the estimator $\hat{\sigma}$ of the standard deviation by the sum of differences from the mean squared.
 
-...
+By increasing the amount of data we reduce $\hat{\sigma}$ and therefore $\hat{SE}(\hat{\beta_i})$
+
+## c) 
+
+```{r}
+lm_4 <- lm(medv ~ crim + age + rm, data = Boston)
+summary(lm_4)
+```
+
+$H_0:  \hat{\beta_\text{rm}}  = 0$  - predictor has no correlation with predicted target value $\hat{y}$
+
+#### ii)
+
+```{r}
+#under H0 the F-value is given
+p = length(coef(lm_4)) + 1
+k = length(coef(lm_4))
+n = nobs(lm_4)
+
+F = ((n - p) / k) * (R / (R - R^2))
+```
 
 # Problem 3
 
