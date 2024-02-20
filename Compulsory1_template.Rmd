@@ -12,7 +12,7 @@ output:
 ```{r setup, include=FALSE}
 library(knitr)
 knitr::opts_chunk$set(echo = TRUE,tidy=TRUE,message=FALSE,warning=FALSE,strip.white=TRUE,prompt=FALSE,
-                      cache=TRUE, size="scriptsize",fig.width=4, fig.height=3,fig.align = "center")
+                      cache=TRUE)
 ```
 
 ```{r,eval=TRUE,echo=FALSE}
@@ -155,8 +155,7 @@ H_{1}&: \beta_{\alpha} \neq 0 && \text{for at least one } \alpha
 \end{align} \$\$
 
 ```{r}
-#under H0 the F-value is given
-t <- Boston["medv"][1]
+#under H0 the F-value is fisher distributed
 p <- length(coef(lm_4)) + 1
 k <- length(coef(lm_4))
 n <- nobs(lm_4)
@@ -165,7 +164,7 @@ RSS <- sum(Boston["medv"] - mean(predict(lm_4))^2)
 SSE <- TSS - RSS
 
 F = ((TSS - RSS) / p) / (RSS / (n - p - 1))
-p_val = qf(F, k, n-p, lower.tail=FALSE) 
+p_val = pf(F, k, n-p, lower.tail=FALSE) 
 print(p_val)
 ```
 
@@ -176,7 +175,6 @@ print(p_val)
 lm_5 = lm(medv ~ crim + age, data = Boston)
 
 
-t <- Boston["medv"][1]
 p <- length(coef(lm_5)) + 1
 k <- length(coef(lm_5))
 n <- nobs(lm_5)
@@ -185,15 +183,49 @@ RSS <- sum(Boston["medv"] - mean(predict(lm_5))^2)
 SSE <- TSS - RSS
 
 F = ((TSS - RSS) / p) / (RSS / (n - p - 1))
-p_val = qf(F, k, n-p, lower.tail=FALSE) 
+p_val = pf(F, k, n-p, lower.tail=FALSE) 
 print(p_val)
 ```
 
 ## d)
 
-## f) 
+#### i)
 
-i) False
+Confidence interval is:
+
+```{r}
+new_obs_df = data.frame(crim=10, age=90, rm=5)
+print(predict(lm_4, new_obs_df, interval="confidence", type="respons"))
+```
+
+#### ii)
+
+```{r}
+print(predict(lm_4, new_obs_df, interval="prediction", type="respons"))
+```
+
+#### iii)
+
+Confidence interval is the interval for where we can say with a certain amount of level of probability that the our linear regression line is (so a confidence interval for our $\beta_{i}$ estimator).
+
+The prediction interval is the interval where we can say a new observation (so a new y observation) must be within. This is will then contain the uncertainty from our $\beta_{i}$ and our irreducible errors.
+
+The prediction interval must always be bigger then the confidence interval as it contains more uncertainty
+
+#### iiii)
+
+```{r}
+#Autoplot will make all the relevant plots for us
+autoplot(lm_4)
+```
+
+The QQ plot describes the distribution of our residuals to a normal distribution. If our residuals are normally distributed the plot will be a straight line (as both the residuals and the normal distribution compared to are equal). We see that our Q-Q plot our residuals are approximately normally distributed close to the 0 quantile, while it increases as we move away from it. This implies that the residuals are not normally distributed (maybe t-distributed based on the Q-Q plot) as we assume when creating the linear regression estimator.
+
+The leverage is how large effect a sample from our data set has on the linear regression estimator, the main factor here is distance from the midpoint of the linear regressor in the feature space. A sample from our data set with a large residual, but low leverage will have a small effect on the linear regression model.
+
+## f)
+
+i)  False
 
 # Problem 3
 
