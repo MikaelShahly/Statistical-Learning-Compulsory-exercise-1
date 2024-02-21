@@ -221,11 +221,28 @@ autoplot(lm_4)
 
 The QQ plot describes the distribution of our residuals to a normal distribution. If our residuals are normally distributed the plot will be a straight line (as both the residuals and the normal distribution compared to are equal). We see that our Q-Q plot our residuals are approximately normally distributed close to the 0 quantile, while it increases as we move away from it. This implies that the residuals are not normally distributed (maybe t-distributed based on the Q-Q plot) as we assume when creating the linear regression estimator.
 
-The leverage is how large effect a sample from our data set has on the linear regression estimator, the main factor here is distance from the midpoint of the linear regressor in the feature space. A sample from our data set with a large residual, but low leverage will have a small effect on the linear regression model.
+The leverage is how large effect a sample from our data set has on the linear regression estimator, the main factor here is distance from the midpoint of the linear regressor in the feature space. A sample from our data set with a large residual, but low leverage will have a small effect on the linear regression model. The flagged samples in the plot are likely outliers
+
+The scale-location plot is used to check the assumption of equal variance between all the residuals. We then plot each standardized residual to the prediction value $\hat{y}$. Equal variances implies no trend. Based on this it seems like the assumption of equal variance in each residual is not correct in our data.
+
+Tukey-Anscombe plot is similare to scale-location just using the residual instead of squared standardized residuals. It should be centered in 0 ( 0 mean) and not have a trend.
+
+## e)
+
+####i) This is incorrect as $x_\text{male}$ and $x_\text{female}$ is encoding the same information.
+
+####ii) we must remove one of the predictors. Which one it is has no meaning $y = \beta_0 + \beta_1*x_\text{male}$ would be a valid formulation.
+
+#### iii)
+
+if we pick bachelor as our reference category and chose to not include it, we would get: $y = \beta_0 + \beta_1x_\text{master} + \beta_2x_\text{phd}$
 
 ## f)
 
 i)  False
+ii) False (spør studass om hva som er variance og bias)
+iii) True
+iv) False
 
 # Problem 3
 
