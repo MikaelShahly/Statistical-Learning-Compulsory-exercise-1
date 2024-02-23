@@ -1,21 +1,14 @@
 ---
 subtitle: "TMA4268 Statistical Learning V2024"
-title: "Compulsory exercise 1: Group XYZ (add your group number here)"
-author: "NN1, NN2 and NN3 (full names of all group members)"
+title: "Compulsory exercise 1: Group 31"
+author: "Emil Jønsrud, Mikael Shahly, Sindre Nogva Vik"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: 
-  html_document
   pdf_document:
     extra_dependencies : ["amsmath"]
 ---
 
-```{r setup, include=FALSE}
-library(knitr)
-knitr::opts_chunk$set(echo = TRUE,tidy=TRUE,message=FALSE,warning=FALSE,strip.white=TRUE,prompt=FALSE,
-                      cache=TRUE)
-```
-
-```{r,eval=TRUE,echo=FALSE}
+```{r,echo=FALSE}
 # install.packages("knitr") # probably already installed
 # install.packages("rmarkdown") # probably already installed
 # install.packages("ggplot2") # plotting with ggplot2
@@ -34,8 +27,6 @@ library("rmarkdown")
 library("ggfortify")
 library("MASS")
 ```
-
-<!--  Etc (load all packages needed). -->
 
 # Problem 1
 
@@ -59,14 +50,17 @@ $var(\hat{f}(X))$ - represents the variance. So how much the estimator will chan
 
 $E([(f(x) - \hat{f}(x)])^2$ - represents the bias, so the expected error between the dataset and our estimator
 
-The derivation of the formula is:$$
-E[(y - \hat{y} )^2] \\
-= E[f(x) + \epsilon - \hat{f}(x)^2] \\
-= E[f(x)^2] + E[\hat{f}(x)]^2 + E[\epsilon^2] + E[\hat{f}(x)^2] + E[2f(x)\epsilon] + E[-2\epsilon \hat{f}(x)] -2E[f(x)\hat{f}(x)] \\
-= f(x)^2 + \epsilon^2 + E[\hat{f}(x)]^2 + 2f(x)E[\epsilon] - 2E[\epsilon]E[\hat{f}(x)] + -2E[f(x)\hat{f}(x)] \\
-= f(x)^2 + E[\epsilon^2] + -2f(x)E[\hat{f}(x)] + E[\hat{f}(x)]^2 + var[\hat{f}(x)]\\
-= E[(f(x) - \hat{f}(x))^2] + var[\hat{f}(x)]+ var[\epsilon]
-$$
+The derivation of the formula is:
+```{=latex}
+\begin{align*}
+E[(y - \hat{y} )^2]
+&= E[f(x) + \epsilon - \hat{f}(x)^2] \\
+&= E[f(x)^2] + E[\hat{f}(x)]^2 + E[\epsilon^2] + E[\hat{f}(x)^2] + E[2f(x)\epsilon] + E[-2\epsilon \hat{f}(x)] -2E[f(x)\hat{f}(x)] \\
+&= f(x)^2 + \epsilon^2 + E[\hat{f}(x)]^2 + 2f(x)E[\epsilon] - 2E[\epsilon]E[\hat{f}(x)] + -2E[f(x)\hat{f}(x)] \\
+&= f(x)^2 + E[\epsilon^2] + -2f(x)E[\hat{f}(x)] + E[\hat{f}(x)]^2 + var[\hat{f}(x)]\\
+&= E[(f(x) - \hat{f}(x))^2] + var[\hat{f}(x)]+ var[\epsilon]
+\end{align*}
+```
 
 The main calculations are that $var[\epsilon] = E[\epsilon]^2 + E[\epsilon^2]$ where $E[\epsilon] =0$. f(x) is not a random variable and is therefore treated like a constant. $\epsilon$ is considered independent from $\hat{f}(x)$ as $\epsilon$ is uncorrelated noise.
 
@@ -149,11 +143,12 @@ $H_0: \hat{\beta_\text{rm}} = 0$ - predictor has no correlation with predicted t
 
 #### ii)
 
-\$\$ \begin{align}
+```{=latex}
+\begin{align*}
 H_{0}&: \beta_{\alpha} = 0 &&\forall \alpha \in \{ \text{crim}, \text{age}, \text{rm} \}  \\
-
 H_{1}&: \beta_{\alpha} \neq 0 && \text{for at least one } \alpha 
-\end{align} \$\$
+\end{align*}
+```
 
 ```{r}
 #under H0 the F-value is fisher distributed
@@ -231,13 +226,13 @@ Tukey-Anscombe plot is similare to scale-location just using the residual instea
 
 ## e)
 
-#### i) Studass
+#### i)
 
-#### This is incorrect as $x_\text{male}$ and $x_\text{female}$ is encoding the same information.
+This is incorrect as $x_\text{male}$ and $x_\text{female}$ is encoding the same information.
 
 #### ii)
 
-#### we must remove one of the predictors. Which one it is has no meaning $y = \beta_0 + \beta_1*x_\text{male}$ would be a valid formulation.
+we must remove one of the predictors. Which one it is has no meaning $y = \beta_0 + \beta_1*x_\text{male}$ would be a valid formulation.
 
 #### iii)
 
@@ -276,7 +271,6 @@ titanic_train <- titanic_train[train_idx, ]
 ```{r}
 logReg <- glm(Survived ~ ., data=titanic_train, family=binomial)
 summary(logReg)
-testaccuracy <- (predict(titanic_test) - 
 ```
 
 ```{r}
@@ -291,7 +285,7 @@ We now do a hypothesis test with the null hypothesis $H_0: \beta_\text{Pclass} =
 #Fit a logistic reg model without Pclass
 logReg2 <- glm(Survived ~ . -Pclass, data=titanic_train, family=binomial)
 
-anova(logReg, logReg2, test="Chisq") #SPØR STUDASS
+anova(logReg, logReg2, test="Chisq")
 
 ```
 
@@ -335,8 +329,6 @@ library(pROC)
 ```
 
 ## b)
-
-## Spør studass
 
 #### i)
 
@@ -391,19 +383,13 @@ points(df$X1, p_tot$posterior[,2])
 
 ## d)
 
-### i)
+i. False
 
-False
+ii. True
 
-###  ii)
+iii. True
 
-True
-
-### iii) Spør studass
-
-### iv)
-
-False
+iv. False
 
 # Problem 4
 
@@ -411,7 +397,7 @@ False
 
 Answer iv) is the correct answer
 
-### b)
+## b)
 
 ```{r}
 set.seed(123)
@@ -424,7 +410,7 @@ selected_vars <- c("crim", "rm", "age", "medv")
 boston_selected <- Boston[, selected_vars]
 
 # manually perform the 5-fold cross-validation
-folds <- createFolds(boston_selected$medv, k = 5) ##K = 5
+folds <- createFolds(boston_selected$medv, k = 5) ## K = 5
 rmse_list <- list()
 
 for (i in 1:length(folds)) {
@@ -490,6 +476,8 @@ cat("rmse_mean:", rmse_mean, "\n")
 
 ## c)
 
+### i.
+
 ```{r}
 # simulate data (no need to change this part)
 set.seed(123)
@@ -497,10 +485,10 @@ n <- 1000 # population size
 dataset <- rnorm(n) # population
 
 # bootstrap
-B <- 10 # bootstrap sample size
-boot <- matrix(NA, nrow = B, ncol = 1)
+B <- 1000 # CORR: bootstrap sample size shold be larger
+boot <- numeric(B) # CORR: matix is not needed
 for (i in 1:B) {
-  boot[i, ] <- median(sample(dataset, 1, replace = FALSE))
+  boot[i] <- median(sample(dataset, n, replace = TRUE)) # CORR
 }
 
 
@@ -509,3 +497,38 @@ standard_erorr_of_the_median_bootstrap <- sd(boot)
 cat("standard_erorr_of_the_median_bootstrap:", standard_erorr_of_the_median_bootstrap, "\n")
 
 ```
+
+### ii.
+
+```{r}
+# simulate data (no need to change this part)
+set.seed(123)
+n <- 1000 # population size
+dataset <- rnorm(n) # population
+
+# bootstrap
+B <- 1000 # CORR: bootstrap sample size shold be larger
+boot_replace <- numeric(B) # CORR: matix is not needed
+boot_no_replace <- numeric(B) # CORR: matix is not needed
+
+for (i in 1:B) {
+  boot_replace[i] <- median(sample(dataset, n, replace = TRUE)) # CORR
+  boot_no_replace[i] <- median(sample(dataset, n, replace = FALSE)) # CORR
+}
+
+
+# compute the standard error of the median from the bootstrap samples
+standard_erorr_of_the_median_bootstrap <- sd(boot_replace)
+cat("standard_erorr_of_the_median_bootstrap:", standard_erorr_of_the_median_bootstrap, "\n")
+standard_erorr_of_the_median_bootstrap <- sd(boot_no_replace)
+cat("standard_erorr_of_the_median_bootstrap without replacement:", standard_erorr_of_the_median_bootstrap, "\n")
+```
+
+Using `replace=FALSE` restricts the sampling to not allow for resampling with replacement. This contradicts the idea of bootstrapping, as we are preventing any data point from being selected more that once.
+
+## d)
+
+i.  True
+ii. False
+iii. True
+iv. False
