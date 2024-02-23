@@ -32,6 +32,7 @@ knitr::opts_chunk$set(echo = TRUE,tidy=TRUE,message=FALSE,warning=FALSE,strip.wh
 library("knitr")
 library("rmarkdown")
 library("ggfortify")
+library("MASS")
 ```
 
 <!--  Etc (load all packages needed). -->
@@ -156,15 +157,15 @@ H_{1}&: \beta_{\alpha} \neq 0 && \text{for at least one } \alpha
 
 ```{r}
 #under H0 the F-value is fisher distributed
-p <- length(coef(lm_4)) + 1
-k <- length(coef(lm_4))
+p <- length(lm_4$coefficients)-1 #length(coef(lm_4))
+k <- length(lm_4$coefficients)-1 #length(coef(lm_4))
 n <- nobs(lm_4)
-TSS <- sum(Boston["medv"] - mean(Boston$medv)^2)
-RSS <- sum(Boston["medv"] - mean(predict(lm_4))^2)
+TSS <- sum((Boston["medv"] - mean(Boston$medv))^2)
+RSS <- sum((Boston["medv"] - predict(lm_4))^2)
 SSE <- TSS - RSS
 
-F = ((TSS - RSS) / p) / (RSS / (n - p - 1))
-p_val = pf(F, k, n-p, lower.tail=FALSE) 
+F_val = ((TSS - RSS) / p) / (RSS / (n - p - 1))
+p_val = pf(F_val, k, n-p, lower.tail=FALSE) 
 print(p_val)
 ```
 
@@ -173,17 +174,18 @@ print(p_val)
 ```{r}
 #for new linear regression model
 lm_5 = lm(medv ~ crim + age, data = Boston)
+summary(lm_5)
 
 
-p <- length(coef(lm_5)) + 1
-k <- length(coef(lm_5))
+p <- length(lm_5$coefficients)-1 #length(coef(lm_4))
+k <- length(lm_5$coefficients)-1 #length(coef(lm_4))
 n <- nobs(lm_5)
-TSS <- sum(Boston["medv"] - mean(Boston$medv)^2)
-RSS <- sum(Boston["medv"] - mean(predict(lm_5))^2)
+TSS <- sum((Boston["medv"] - mean(Boston$medv))^2)
+RSS <- sum((Boston["medv"] - predict(lm_5))^2)
 SSE <- TSS - RSS
 
-F = ((TSS - RSS) / p) / (RSS / (n - p - 1))
-p_val = pf(F, k, n-p, lower.tail=FALSE) 
+F_val = ((TSS - RSS) / p) / (RSS / (n - p - 1))
+p_val = pf(F_val, k, n-p, lower.tail=FALSE) 
 print(p_val)
 ```
 
@@ -229,9 +231,13 @@ Tukey-Anscombe plot is similare to scale-location just using the residual instea
 
 ## e)
 
-####i) This is incorrect as $x_\text{male}$ and $x_\text{female}$ is encoding the same information.
+#### i) Studass
 
-####ii) we must remove one of the predictors. Which one it is has no meaning $y = \beta_0 + \beta_1*x_\text{male}$ would be a valid formulation.
+#### This is incorrect as $x_\text{male}$ and $x_\text{female}$ is encoding the same information.
+
+#### ii)
+
+#### we must remove one of the predictors. Which one it is has no meaning $y = \beta_0 + \beta_1*x_\text{male}$ would be a valid formulation.
 
 #### iii)
 
@@ -240,10 +246,266 @@ if we pick bachelor as our reference category and chose to not include it, we wo
 ## f)
 
 i)  False
-ii) False (spør studass om hva som er variance og bias)
+ii) False
 iii) True
 iv) False
 
 # Problem 3
 
+```{r}
+set.seed(123)
+# prepare the dataset into training and test datasets
+library(titanic)
+data("titanic_train")
+
+# remove some variables that are difficult to handle.
+# NB! after the removal, the datasets have the variable names of
+# [Survived, Pclass, Sex, Age, SibSp, Parch, Fare].
+vars_to_be_removed <- c("PassengerId", "Name", "Ticket", "Cabin", "Embarked")
+titanic_train <- titanic_train[, -which(names(titanic_train) %in% vars_to_be_removed)]
+
+# make Pclass a categorical variable
+titanic_train$Pclass <- as.factor(titanic_train$Pclass)
+
+# divide the dataset into training and test datasets
+train_idx <- sample(1:nrow(titanic_train), 0.8 * nrow(titanic_train))
+titanic_test <- titanic_train[-train_idx, ]
+titanic_train <- titanic_train[train_idx, ]
+```
+
+```{r}
+logReg <- glm(Survived ~ ., data=titanic_train, family=binomial)
+summary(logReg)
+testaccuracy <- (predict(titanic_test) - 
+```
+
+```{r}
+prediction_prob <- predict(logReg, new_data=titanic_test, type="response")
+predictions <- as-factor(ifelse(prediction_prob > 0.5, 1, 0))
+test_accuracy <- mean(titanic_test$Survived == predictions)
+```
+
+We now do a hypothesis test with the null hypothesis $H_0: \beta_\text{Pclass} = 0$ which implies that the predictor has no predictive power in the model.
+
+```{r}
+#Fit a logistic reg model without Pclass
+logReg2 <- glm(Survived ~ . -Pclass, data=titanic_train, family=binomial)
+
+anova(logReg, logReg2, test="Chisq") #SPØR STUDASS
+
+```
+
+As the p-value is very low we can reject our null hypothesis.
+
+```{r}
+
+
+
+new_obs_dfTit = data.frame(Pclass = factor(1), Sex = "female", Age = 40, SibSp = 1, Parch = 0, Fare = 200)
+new_obs_dfTit2 = data.frame(Pclass = factor(3), Sex = "female", Age = 40, SibSp = 1, Parch = 0, Fare = 20)
+
+print(predict(logReg, new_obs_dfTit))
+print(predict(logReg, new_obs_dfTit2))
+```
+
+```{r}
+#iv)
+
+lda_fit = lda(Survived ~ ., data=titanic_train)
+prediction_prob_lda <- predict(lda_fit, new_data=titanic_test, type="response") #hvorfor så lang?
+predictions_lda <- as.factor(ifelse(prediction_prob_lda$posterior > 0.5, 1, 0))
+test_accuracy_lda <- mean(titanic_test$Survived == predictions_lda)
+print(test_accuracy_lda)
+```
+
+```{r}
+qda_fit = qda(Survived ~ ., data=titanic_train)
+
+prediction_prob_qda <- predict(qda_fit, new_data=titanic_test, type="response")
+predictions_qda <- as.factor(ifelse(prediction_prob_qda$posterior > 0.5, 1, 0))
+test_accuracy_qda <- mean(titanic_test$Survived == predictions_lda)
+print(test_accuracy_qda)
+```
+
+```{r}
+#Making ROC curve for logReg¨
+#spør studass om hvorfor vi får ROC curves - plot of sensisvity ~ (1 - sensitivity)
+#Note, the plot is for different threshold values (so the threshold acts as a time #variable)
+library(pROC)
+```
+
+## b)
+
+## Spør studass
+
+#### i)
+
+In both paradigms we try to estimate $P(Y=k | X=x)$ but the difference is how we estimate it.
+
+In the diagnostic paradigm we directly try to estimate $P(Y=k | X=x)$
+
+#### ii)
+
+diagnostic: logistic regression, KNN sampling: Naive Bayes classifier, LDA, QDA
+
+## c)
+
+### ii)
+
+```{r}
+
+set.seed(123) # Replace 123 with any number of your choice
+# generate data for the two normal distributions
+n_samples_class1 <- 3000
+n_samples_class2 <- 7000
+x1 <- rnorm(n_samples_class1, mean = -2, sd = 1.5)
+x2 <- rnorm(n_samples_class2, mean = 2, sd = 1.5)
+# create a data frame with the generated data
+df <- data.frame(X1 = c(x1, x2), class = c(rep(1, n_samples_class1), rep(2, n_samples_class2)))
+8
+# fit LDA
+lda_model <- lda(class ~ ., data = df)
+
+```
+
+### iii)
+
+```{r}
+# predict p_k(x) using the fitted LDA model
+df_1 <- df[df$class == 1,]["X1"]
+df_2 <- df[df$class == 2,]["X1"]
+
+p_1_x <- predict(lda_model, df_1) # compute p_1(X)
+p_2_x <- predict(lda_model, df_2) # compute p_2(X)
+p_tot <- predict(lda_model) #computes both in posterior
+```
+
+### iv)
+
+```{r}
+plot(df$X1, p_tot$posterior[,1])
+points(df$X1, p_tot$posterior[,2])
+
+#plot((p_2_x$posterior[,1], df_2$X1))
+```
+
+## d)
+
+### i)
+
+False
+
+###  ii)
+
+True
+
+### iii) Spør studass
+
+### iv)
+
+False
+
 # Problem 4
+
+## a)
+
+Answer iv) is the correct answer
+
+### b)
+
+```{r}
+set.seed(123)
+# Import the Boston housing price dataset
+library(caret)
+data(Boston)
+
+# select specific variables
+selected_vars <- c("crim", "rm", "age", "medv")
+boston_selected <- Boston[, selected_vars]
+
+# manually perform the 5-fold cross-validation
+folds <- createFolds(boston_selected$medv, k = 5) ##K = 5
+rmse_list <- list()
+
+for (i in 1:length(folds)) {
+  # get the training and validation sets
+  ##incorrect, we should use 1 fold for val and the rest for training
+  train <- boston_selected[-folds[[i]], ]
+  val <- boston_selected[folds[[i]], ]
+  
+  # fit a linear regression model
+  model <- lm(medv ~ ., data = train)
+  
+  # compute RMSE on the validation set
+  pred <- predict(model, val)
+  ##INCORRECT: ERRORS NOT SQUARED
+  rmse <- sqrt(mean((pred - val$medv)^2)) # root mean squared error (RSME)
+  rmse <- rmse[1] # take out the value
+  # store rmse in rmse_list
+  rmse_list[[i]] <- rmse
+}
+
+# compute mean of rmse_list
+rmse_mean <- mean(as.numeric(rmse_list))
+cat("rmse_mean:", rmse_mean, "\n")
+
+```
+
+```{r}
+set.seed(123)
+# Import the Boston housing price dataset
+library(caret)
+data(Boston)
+
+# select specific variables
+selected_vars <- c("crim", "rm", "age", "medv")
+boston_selected <- Boston[, selected_vars]
+
+# manually perform the 5-fold cross-validation
+folds <- createFolds(boston_selected$medv, k = length(Boston$medv))
+rmse_list <- list()
+
+for (i in 1:length(folds)) {
+  # get the training and validation sets
+  ##incorrect, we should use 1 fold for val and the rest for training
+  train <- boston_selected[-folds[[i]], ]
+  val <- boston_selected[folds[[i]], ]
+  
+  # fit a linear regression model
+  model <- lm(medv ~ ., data = train)
+  
+  # compute RMSE on the validation set
+  pred <- predict(model, val)
+  ##INCORRECT: ERRORS NOT SQUARED
+  rmse <- sqrt(mean((pred - val$medv)^2)) # root mean squared error (RSME)
+  rmse <- rmse[1] # take out the value
+  # store rmse in rmse_list
+  rmse_list[[i]] <- rmse
+}
+
+# compute mean of rmse_list
+rmse_mean <- mean(as.numeric(rmse_list))
+cat("rmse_mean:", rmse_mean, "\n")
+```
+
+## c)
+
+```{r}
+# simulate data (no need to change this part)
+set.seed(123)
+n <- 1000 # population size
+dataset <- rnorm(n) # population
+
+# bootstrap
+B <- 10 # bootstrap sample size
+boot <- matrix(NA, nrow = B, ncol = 1)
+for (i in 1:B) {
+  boot[i, ] <- median(sample(dataset, 1, replace = FALSE))
+}
+
+
+# compute the standard error of the median from the bootstrap samples
+standard_erorr_of_the_median_bootstrap <- sd(boot)
+cat("standard_erorr_of_the_median_bootstrap:", standard_erorr_of_the_median_bootstrap, "\n")
+
+```
